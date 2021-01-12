@@ -1,33 +1,25 @@
-
 (async () => {
-  const { Harmony } = require("@harmony-js/core")
-  const { HttpProvider, Messenger } = require("@harmony-js/network")
+  const { Harmony } = require("@harmony-js/core");
+  const { HttpProvider, Messenger } = require("@harmony-js/network");
   const {
     ChainID,
-    ChainType,
-    hexToNumber,
-    numberToHex,
-    fromWei,
-    Units,
-    Unit,
-  } = require('@harmony-js/utils');
+    ChainType
+  } = require("@harmony-js/utils");
 
-  const Web3 = require('web3')
+  const Web3 = require("web3");
 
   const hmy = new Harmony(
     "https://api.s0.b.hmny.io",
     //'https://api0.s0.t.hmny.io',
     {
       chainType: ChainType.Harmony,
-      chainId: ChainID.HmyTestnet,
+      chainId: ChainID.HmyTestnet
     }
   );
 
-  // process.exit(0)
-
   const addrHex = hmy.crypto.getAddress("one13wuzxyzgwghkz4l9d3k53lu40gy5yvadyal98r").checksum;
 
-  console.log( addrHex);
+  console.log(addrHex);
 
   const json = require("./ABI.json");
   let ethMultiSigContract = hmy.contracts.createContract(json.abi, addrHex);
@@ -42,9 +34,9 @@
 
   let latest = Number(res.result);
   let logs = [];
-  const interval = 30000;
+  const interval = 100000;
 
-// while(latest > 0) {
+while(latest > 0) {
   console.log(latest);
 
   res = await logsMessenger.send("hmy_getLogs", [
@@ -59,9 +51,9 @@
   logs = logs.concat(res.result);
 
   latest = latest - interval;
-//}
+}
 
-  const web3 = new Web3(process.env.ETH_NODE_URL);
+  const web3 = new Web3("https://api.s0.b.hmny.io");
 
   const decoded = logs.map(lastLog => web3.eth.abi.decodeLog(
     ethMultiSigContract.abiModel.getEvent("Transfer").inputs,
@@ -70,6 +62,13 @@
 
   console.log(decoded);
   console.log("Time: ", (Date.now() - begin) / 1000);
-  process.exit(0)
+
+  const csv = decoded.map(e => `${e.from},${e.to},${e.tokenId}`);
+  const csvString = "from,to,tokenId\n" + csv.join("\n");
+  const fs = require("fs");
+  fs.writeFileSync("result.csv", csvString);
+
+  process.exit(0);
+
 })();
 

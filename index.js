@@ -23,7 +23,7 @@ const hmy = new Harmony(
 
   const tokens = new Set()
 
-  const addrHex = hmy.crypto.getAddress("0x245efef8d82c0cfd3a0924bb3022e47bb89d8cba").checksum;
+  const addrHex = hmy.crypto.getAddress("0xd33a13b17fea4c8af90b194cfd7cf1e8992a0548").checksum;
 
   console.log(addrHex);
 
@@ -92,7 +92,7 @@ const hmy = new Harmony(
 
   const usersArr = Object.values(users)
   const csv = usersArr.map(e => `${e.owner},${e.playerID},${e.count * 2400},${e.count * 730}`);
-  const csvString = "ONE address,playerID,gems,VIP points\n" + csv.join("\n");
+  const csvString = "ONE address,player ID,gems,VIP points\n" + csv.join("\n");
   const fs = require("fs");
   fs.writeFileSync("result.csv", csvString);
 

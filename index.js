@@ -8,13 +8,14 @@ const {
 const json = require("./ABI.json");
 const saleABI = require("./ABI2.json");
 
-const url = "https://api.s0.b.hmny.io";
+//const url = "https://api.s0.b.hmny.io";
+const url = "https://api0.s0.t.hmny.io"
 const hmy = new Harmony(
   url,
 //'https://api0.s0.t.hmny.io',
   {
     chainType: ChainType.Harmony,
-    chainId: ChainID.HmyTestnet
+    chainId: ChainID.HmyMainnet//ChainID.HmyTestnet
   });
 
 (async () => {
@@ -23,7 +24,7 @@ const hmy = new Harmony(
 
   const tokens = new Set()
 
-  const addrHex = hmy.crypto.getAddress("0xd33a13b17fea4c8af90b194cfd7cf1e8992a0548").checksum;
+  const addrHex = hmy.crypto.getAddress("0x72b6bb449eaf7e51318e908eb8fe87efc69eaa28").checksum;
 
   console.log(addrHex);
 
@@ -31,7 +32,7 @@ const hmy = new Harmony(
 
   let res = await hmy.blockchain.getBlockNumber();
 
-  let logsMessenger = new Messenger(new HttpProvider("https://api.s0.b.hmny.io"));
+  let logsMessenger = new Messenger(new HttpProvider(url));
 
   const topicAddress = ethMultiSigContract.abiModel.getEvent("Transfer").signature;
 
@@ -40,7 +41,7 @@ const hmy = new Harmony(
   const interval = 100000;
 
   // todo set start block
-  while (latest > 4500000) {
+  while (latest > 7711941) {
     console.log(latest);
 
     res = await logsMessenger.send("hmy_getLogs", [
@@ -57,7 +58,7 @@ const hmy = new Harmony(
     latest = latest - interval;
   }
 
-  const web3 = new Web3("https://api.s0.b.hmny.io");
+  const web3 = new Web3(url);
 
   const decoded = logs.map(lastLog => web3.eth.abi.decodeLog(
     ethMultiSigContract.abiModel.getEvent("Transfer").inputs,
@@ -79,10 +80,10 @@ const hmy = new Harmony(
 
     //const meta = await axios.get(uri).then(r=>r.data)
 
-    if (users[playerID]) {
-      users[playerID].count++
+    if (users[playerID + owner]) {
+      users[playerID + owner].count++
     }  else {
-      users[playerID] = {
+      users[playerID + owner] = {
         count: 1,
         playerID,
         owner: hmy.crypto.toBech32(owner)

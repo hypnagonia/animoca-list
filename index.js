@@ -9,7 +9,7 @@ const json = require("./ABI.json");
 const saleABI = require("./ABI2.json");
 
 //const url = "https://api.s0.b.hmny.io";
-const url = "https://api0.s0.t.hmny.io"
+const url = "https://api0.s0.t.hmny.io";
 const hmy = new Harmony(
   url,
 //'https://api0.s0.t.hmny.io',
@@ -22,7 +22,7 @@ const hmy = new Harmony(
 
   const Web3 = require("web3");
 
-  const tokens = new Set()
+  const tokens = new Set();
 
   const addrHex = hmy.crypto.getAddress("0x72b6bb449eaf7e51318e908eb8fe87efc69eaa28").checksum;
 
@@ -41,7 +41,7 @@ const hmy = new Harmony(
   const interval = 100000;
 
   // todo set start block
-  while (latest > 7711941) {
+  while (latest > 7812029) {
     console.log(latest);
 
     res = await logsMessenger.send("hmy_getLogs", [
@@ -60,17 +60,29 @@ const hmy = new Harmony(
 
   const web3 = new Web3(url);
 
-  const decoded = logs.map(lastLog => web3.eth.abi.decodeLog(
-    ethMultiSigContract.abiModel.getEvent("Transfer").inputs,
-    lastLog.data,
-    lastLog.topics.slice(1)));
+  const decoded = logs.map(lastLog => ({
+      ...web3.eth.abi.decodeLog(
+        ethMultiSigContract.abiModel.getEvent("Transfer").inputs,
+        lastLog.data,
+        lastLog.topics.slice(1)),
+      blockNumber: Number(lastLog.blockNumber, 16)
+    })
+  );
 
+  const getLastBlock = tokenIds => {
+    return decoded.reduce((a, b) => {
+      if (!tokenIds.includes(b.tokenId)) {
+        return a;
+      }
+      return a > b.blockNumber ? a : b.blockNumber;
+    }, 0);
+  };
 
   decoded.forEach(t => {
-    tokens.add(t.tokenId)
-  })
+    tokens.add(t.tokenId);
+  });
 
-  const users = {}
+  const users = {};
 
   for (let t of tokens) {
 
@@ -81,19 +93,23 @@ const hmy = new Harmony(
     //const meta = await axios.get(uri).then(r=>r.data)
 
     if (users[playerID + owner]) {
-      users[playerID + owner].count++
-    }  else {
+      users[playerID + owner].count++;
+      users.tokenIds && users.tokenIds.push(t)
+    } else {
       users[playerID + owner] = {
         count: 1,
         playerID,
-        owner: hmy.crypto.toBech32(owner)
-      }
+        owner: hmy.crypto.toBech32(owner),
+        tokenIds: [t]
+      };
     }
   }
 
-  const usersArr = Object.values(users)
-  const csv = usersArr.map(e => `${e.owner},${e.playerID},${e.count * 2400},${e.count * 730}`);
-  const csvString = "ONE address,player ID,gems,VIP points\n" + csv.join("\n");
+  //console.log({users})
+  //process.exit(0)
+  const usersArr = Object.values(users);
+  const csv = usersArr.map(e => `${getLastBlock(e.tokenIds)},${e.owner},${e.playerID},${e.count * 2400},${e.count * 730}`);
+  const csvString = new Date() + "\nBlock #,ONE address,player ID,gems,VIP points\n" + csv.join("\n");
   const fs = require("fs");
   fs.writeFileSync("result.csv", csvString);
 

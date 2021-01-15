@@ -108,8 +108,8 @@ const hmy = new Harmony(
   //console.log({users})
   //process.exit(0)
   const usersArr = Object.values(users);
-  const csv = usersArr.map(e => `${getLastBlock(e.tokenIds)},${e.owner},${e.playerID},${e.count * 2400},${e.count * 730}`);
-  const csvString =  "Block #,ONE address,player ID,gems,VIP points\n" + csv.join("\n") + '\n' + Date.now() + ',,,,';
+  const csv = usersArr.map(e => `${getLastBlock(e.tokenIds)},${e.owner},${e.playerID},${e.count},${e.count * 2400},${e.count * 730}`);
+  const csvString =  "Block #,ONE address,player ID,cards,gems,VIP points\n" + csv.join("\n") + '\n' + Date.now() + ',,,,,';
   const fs = require("fs");
   fs.writeFileSync("result.csv", csvString);
 

@@ -82,21 +82,29 @@ const hmy = new Harmony(
     tokens.add(t.tokenId);
   });
 
-  console.log(decoded.length)
+  console.log('Total',decoded.length);
 
   const users = {};
-
+  const tokensWithInfo = [];
+  let index = 1;
   for (let t of tokens) {
-
-    //const uri = await ethMultiSigContract.methods.tokenURI(t).call();
+    console.log(index++, t);
+    const uri = await ethMultiSigContract.methods.tokenURI(t).call();
     const owner = await ethMultiSigContract.methods.ownerOf(t).call();
     const playerID = await ethMultiSigContract.methods.playerIdByToken(t).call();
 
-    //const meta = await axios.get(uri).then(r=>r.data)
+    const meta = await axios.get(uri).then(r => r.data);
+
+    tokensWithInfo.push({
+      playerID,
+      owner: hmy.crypto.toBech32(owner),
+      tokenId: t,
+      image: meta.image
+    });
 
     if (users[playerID + owner]) {
       users[playerID + owner].count++;
-      users.tokenIds && users.tokenIds.push(t)
+      users.tokenIds && users.tokenIds.push(t);
     } else {
       users[playerID + owner] = {
         count: 1,
@@ -107,11 +115,11 @@ const hmy = new Harmony(
     }
   }
 
-  //console.log({users})
-  //process.exit(0)
   const usersArr = Object.values(users);
   const csv = usersArr.map(e => `${getLastBlock(e.tokenIds)},${e.owner},${e.playerID},${e.count},${e.count * 2400},${e.count * 730}`);
-  const csvString =  "latest block #,ONE address,player ID,cards,gems,VIP points\n" + csv.join("\n") + '\n' + Date.now() + ',,,,,';
+  const csvString = "latest block #,ONE address,player ID,cards,gems,VIP points\n" + csv.join("\n") + "\n"
+    + Date.now() + ",,,,,\n"
+    + "Total" + `,,,${usersArr.reduce((a, b) => a + b.count.length, 0)},,`;
   const fs = require("fs");
   fs.writeFileSync("result.csv", csvString);
 

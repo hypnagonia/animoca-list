@@ -24,7 +24,7 @@ const hmy = new Harmony(
 
   const tokens = new Set();
 
-  const addrHex = hmy.crypto.getAddress("0x72b6bb449eaf7e51318e908eb8fe87efc69eaa28").checksum;
+  const addrHex = hmy.crypto.getAddress("0xd45f2890afc159f96702de015b414c7d1cda3dba").checksum;
 
   console.log(addrHex);
 
@@ -82,6 +82,8 @@ const hmy = new Harmony(
     tokens.add(t.tokenId);
   });
 
+  console.log(decoded.length)
+
   const users = {};
 
   for (let t of tokens) {
@@ -109,7 +111,7 @@ const hmy = new Harmony(
   //process.exit(0)
   const usersArr = Object.values(users);
   const csv = usersArr.map(e => `${getLastBlock(e.tokenIds)},${e.owner},${e.playerID},${e.count},${e.count * 2400},${e.count * 730}`);
-  const csvString =  "Block #,ONE address,player ID,cards,gems,VIP points\n" + csv.join("\n") + '\n' + Date.now() + ',,,,,';
+  const csvString =  "latest block #,ONE address,player ID,cards,gems,VIP points\n" + csv.join("\n") + '\n' + Date.now() + ',,,,,';
   const fs = require("fs");
   fs.writeFileSync("result.csv", csvString);
 
